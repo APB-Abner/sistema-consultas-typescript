@@ -64,14 +64,21 @@ function criarConsulta(id, medico, paciente, data, valor) {
         status: "agendada",
     };
 }
-function confirmarConsulta(consulta) {
-    return Object.assign(Object.assign({}, consulta), { status: "confirmada" });
-}
-function cancelarConsulta(consulta) {
-    if (consulta.status === "realizada") {
+function alterarStatusConsulta(consulta, novoStatus) {
+    if (consulta.status === "realizada" && novoStatus === "cancelada") {
         return null;
     }
-    return Object.assign(Object.assign({}, consulta), { status: "cancelada" });
+    return Object.assign(Object.assign({}, consulta), { status: novoStatus });
+}
+function confirmarConsulta(consulta) {
+    const consultaConfirmada = alterarStatusConsulta(consulta, "confirmada");
+    if (!consultaConfirmada) {
+        throw new Error("Não foi possível confirmar a consulta");
+    }
+    return consultaConfirmada;
+}
+function cancelarConsulta(consulta) {
+    return alterarStatusConsulta(consulta, "cancelada");
 }
 function listarConsultasPorStatus(consultas, status) {
     return consultas.filter((consulta) => consulta.status === status);
@@ -80,6 +87,11 @@ function listarConsultasFuturas(consultas) {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
     return consultas.filter((consulta) => consulta.data >= hoje);
+}
+function calcularFaturamento(consultas) {
+    return consultas
+        .filter((consulta) => consulta.status === "realizada")
+        .reduce((total, consulta) => total + consulta.valor, 0);
 }
 function exibirConsulta(consulta) {
     const valorFormatado = consulta.valor.toLocaleString("pt-BR", {
@@ -99,16 +111,21 @@ Status: ${consulta.status}
 const consultas = [];
 const consulta1 = criarConsulta(1, medico1, paciente1, new Date(2026, 1, 28), 350);
 consultas.push(consulta1);
-const consulta2 = confirmarConsulta(criarConsulta(2, medico2, paciente2, new Date(2026, 2, 1), 420));
-consultas.push(consulta2);
-const consulta3Base = criarConsulta(3, medico3, paciente3, new Date(2026, 0, 15), 280);
-const consulta3Cancelada = cancelarConsulta(consulta3Base);
-if (consulta3Cancelada) {
-    consultas.push(consulta3Cancelada);
+const consulta2Base = criarConsulta(2, medico2, paciente2, new Date(2026, 2, 1), 420);
+const consulta2 = alterarStatusConsulta(consulta2Base, "confirmada");
+if (consulta2) {
+    consultas.push(consulta2);
 }
-const consulta4Confirmada = confirmarConsulta(criarConsulta(4, medico1, paciente2, new Date(2026, 0, 10), 300));
-const consulta4Realizada = Object.assign(Object.assign({}, consulta4Confirmada), { status: "realizada" });
-consultas.push(consulta4Realizada);
+const consulta3 = criarConsulta(3, medico3, paciente3, new Date(2026, 0, 15), 280);
+const consulta3Realizada = alterarStatusConsulta(consulta3, "realizada");
+if (consulta3Realizada) {
+    consultas.push(consulta3Realizada);
+}
+const consulta4Base = criarConsulta(4, medico1, paciente2, new Date(2026, 0, 10), 300);
+const consulta4Cancelada = alterarStatusConsulta(consulta4Base, "cancelada");
+if (consulta4Cancelada) {
+    consultas.push(consulta4Cancelada);
+}
 const consulta5 = criarConsulta(5, medico2, paciente1, new Date(2026, 2, 5), 390);
 consultas.push(consulta5);
 console.log("=== TODAS AS CONSULTAS ===");
@@ -117,8 +134,19 @@ console.log("=== CONSULTAS CONFIRMADAS ===");
 listarConsultasPorStatus(consultas, "confirmada").forEach((consulta) => {
     console.log(exibirConsulta(consulta));
 });
+console.log("=== CONSULTAS REALIZADAS ===");
+listarConsultasPorStatus(consultas, "realizada").forEach((consulta) => {
+    console.log(exibirConsulta(consulta));
+});
 console.log("=== CONSULTAS FUTURAS ===");
 listarConsultasFuturas(consultas).forEach((consulta) => {
     console.log(exibirConsulta(consulta));
 });
+const faturamento = calcularFaturamento(consultas);
+const faturamentoFormatado = faturamento.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+});
+console.log("=== FATURAMENTO (CONSULTAS REALIZADAS) ===");
+console.log(faturamentoFormatado);
 export {};
