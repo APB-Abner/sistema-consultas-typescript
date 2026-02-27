@@ -98,6 +98,19 @@ function cancelarConsulta(consulta: Consulta): Consulta | null {
     };
 }
 
+function listarConsultasPorStatus(
+    consultas: Consulta[],
+    status: StatusConsulta
+): Consulta[] {
+    return consultas.filter((consulta) => consulta.status === status);
+}
+
+function listarConsultasFuturas(consultas: Consulta[]): Consulta[] {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    return consultas.filter((consulta) => consulta.data >= hoje);
+}
+
 function exibirConsulta(consulta: Consulta): string {
     const valorFormatado = consulta.valor.toLocaleString("pt-BR", {
         style: "currency",
@@ -114,14 +127,61 @@ Status: ${consulta.status}
 `;
 }
 
+const consultas: Consulta[] = [];
 
 const consulta1 = criarConsulta(
     1,
     medico1,
     paciente1,
-    new Date(),
+    new Date(2026, 1, 28),
     350
 );
-const consultaConfirmada = confirmarConsulta(consulta1);
-console.log("=== CONSULTA CONFIRMADA ===");
-console.log(exibirConsulta(consultaConfirmada));    
+consultas.push(consulta1);
+
+const consulta2 = confirmarConsulta(
+    criarConsulta(2, medico2, paciente2, new Date(2026, 2, 1), 420)
+);
+consultas.push(consulta2);
+
+const consulta3Base = criarConsulta(
+    3,
+    medico3,
+    paciente3,
+    new Date(2026, 0, 15),
+    280
+);
+const consulta3Cancelada = cancelarConsulta(consulta3Base);
+if (consulta3Cancelada) {
+    consultas.push(consulta3Cancelada);
+}
+
+const consulta4Confirmada = confirmarConsulta(
+    criarConsulta(4, medico1, paciente2, new Date(2026, 0, 10), 300)
+);
+const consulta4Realizada: Consulta = {
+    ...consulta4Confirmada,
+    status: "realizada",
+};
+consultas.push(consulta4Realizada);
+
+const consulta5 = criarConsulta(
+    5,
+    medico2,
+    paciente1,
+    new Date(2026, 2, 5),
+    390
+);
+consultas.push(consulta5);
+
+console.log("=== TODAS AS CONSULTAS ===");
+consultas.forEach((consulta) => console.log(exibirConsulta(consulta)));
+
+console.log("=== CONSULTAS CONFIRMADAS ===");
+listarConsultasPorStatus(consultas, "confirmada").forEach((consulta) => {
+    console.log(exibirConsulta(consulta));
+});
+
+console.log("=== CONSULTAS FUTURAS ===");
+listarConsultasFuturas(consultas).forEach((consulta) => {
+    console.log(exibirConsulta(consulta));
+});
