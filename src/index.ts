@@ -147,16 +147,13 @@ const consulta1 = criarConsulta(
     1,
     medico1,
     paciente1,
-    new Date(2026, 1, 28),
+    new Date(2026, 9, 28),
     350
 );
 consultas.push(consulta1);
 
-const consulta2Base = criarConsulta(2, medico2, paciente2, new Date(2026, 2, 1), 420);
-const consulta2 = alterarStatusConsulta(consulta2Base, "confirmada");
-if (consulta2) {
-    consultas.push(consulta2);
-}
+const consulta2Base = criarConsulta(2, medico2, paciente2, new Date(2026, 10, 1), 420);
+consultas.push(confirmarConsulta(consulta2Base));
 
 const consulta3 = criarConsulta(
     3,
@@ -171,7 +168,7 @@ if (consulta3Realizada) {
 }
 
 const consulta4Base = criarConsulta(4, medico1, paciente2, new Date(2026, 0, 10), 300);
-const consulta4Cancelada = alterarStatusConsulta(consulta4Base, "cancelada");
+const consulta4Cancelada = cancelarConsulta(consulta4Base);
 if (consulta4Cancelada) {
     consultas.push(consulta4Cancelada);
 }
@@ -180,7 +177,7 @@ const consulta5 = criarConsulta(
     5,
     medico2,
     paciente1,
-    new Date(2026, 2, 5),
+    new Date(2026, 11, 5),
     390
 );
 consultas.push(consulta5);
