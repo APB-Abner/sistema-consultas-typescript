@@ -6,7 +6,7 @@ import { Paciente } from "../types/paciente";
 import { Medico } from "../interfaces/medico";
 import { Consulta } from "../interfaces/consulta";
 import { ConsultaCard } from "../components";
-import { styles } from "../styles/app.styles";
+import { styles } from "../styles/home.styles";
 
 export default function Home() {
   const cardiologia: Especialidade = {
