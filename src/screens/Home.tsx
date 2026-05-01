@@ -1,58 +1,52 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import React, { useCallback, useState } from "react";
+import { Button, ScrollView, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Especialidade } from "../types/especialidade";
-import { Paciente } from "../types/paciente";
-import { Medico } from "../interfaces/medico";
-import { Consulta } from "../interfaces/consulta";
+import { useFocusEffect } from "@react-navigation/native";
 import { ConsultaCard } from "../components";
-import { styles } from "../styles/home.styles";
+import { Consulta } from "../interfaces/consulta";
+import { obterConsultas, salvarConsultas } from "../services/storage";
+import { styles } from "../styles/app.styles";
 
-export default function Home() {
-  const cardiologia: Especialidade = {
-    id: 1,
-    nome: "Cardiologia",
-    descricao: "Cuidados com o coração",
+type HomeProps = {
+  navigation?: {
+    navigate: (screen: "Admin") => void;
   };
+};
 
-  const medico1: Medico = {
-    id: 1,
-    nome: "Dr. Roberto Silva",
-    crm: "CRM12345",
-    especialidade: cardiologia,
-    ativo: true,
-  };
+export default function Home({ navigation }: HomeProps) {
+  const [consultas, setConsultas] = useState<Consulta[]>([]);
 
-  const paciente1: Paciente = {
-    id: 1,
-    nome: "Carlos Andrade",
-    cpf: "123.456.789-00",
-    email: "carlos@email.com",
-    telefone: "(11) 98765-4321",
-  };
+  useFocusEffect(
+    useCallback(() => {
+      carregarConsultas();
+    }, [])
+  );
 
-  const [consulta, setConsulta] = useState<Consulta>({
-    id: 1,
-    medico: medico1,
-    paciente: paciente1,
-    data: new Date(2026, 2, 10),
-    valor: 350,
-    status: "agendada",
-    observacoes: "Consulta de rotina",
-  });
-
-  function confirmarConsulta() {
-    setConsulta({
-      ...consulta,
-      status: "confirmada",
-    });
+  async function carregarConsultas() {
+    const consultasSalvas = await obterConsultas();
+    setConsultas(consultasSalvas);
   }
 
-  function cancelarConsulta() {
-    setConsulta({
-      ...consulta,
-      status: "cancelada",
-    });
+  async function confirmarConsulta(consultaId: number) {
+    const consultasAtualizadas = consultas.map((consulta) =>
+      consulta.id === consultaId
+        ? { ...consulta, status: "confirmada" as const }
+        : consulta
+    );
+
+    setConsultas(consultasAtualizadas);
+    await salvarConsultas(consultasAtualizadas);
+  }
+
+  async function cancelarConsulta(consultaId: number) {
+    const consultasAtualizadas = consultas.map((consulta) =>
+      consulta.id === consultaId
+        ? { ...consulta, status: "cancelada" as const }
+        : consulta
+    );
+
+    setConsultas(consultasAtualizadas);
+    await salvarConsultas(consultasAtualizadas);
   }
 
   return (
@@ -60,14 +54,38 @@ export default function Home() {
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.titulo}>Sistema de Consultas</Text>
-          <Text style={styles.subtitulo}>Consulta #{consulta.id}</Text>
+          <Text style={styles.titulo}>Minhas Consultas</Text>
+          <Text style={styles.subtitulo}>
+            {consultas.length} consulta(s) cadastrada(s)
+          </Text>
         </View>
-        <ConsultaCard
-          consulta={consulta}
-          onConfirmar={confirmarConsulta}
-          onCancelar={cancelarConsulta}
-        />
+
+        {consultas.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>Nenhuma consulta cadastrada.</Text>
+            <Button
+              title="Ir para Admin"
+              onPress={() => navigation?.navigate("Admin")}
+            />
+          </View>
+        ) : (
+          <>
+            <View style={styles.adminButton}>
+              <Button
+                title="Cadastrar nova consulta"
+                onPress={() => navigation?.navigate("Admin")}
+              />
+            </View>
+            {consultas.map((consulta) => (
+              <ConsultaCard
+                key={consulta.id}
+                consulta={consulta}
+                onConfirmar={() => confirmarConsulta(consulta.id)}
+                onCancelar={() => cancelarConsulta(consulta.id)}
+              />
+            ))}
+          </>
+        )}
       </ScrollView>
     </View>
   );

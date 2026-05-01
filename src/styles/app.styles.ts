@@ -23,5 +23,16 @@ export const styles = StyleSheet.create({
     color: "#fff",
     opacity: 0.9,
   },
+  emptyState: {
+    padding: 20,
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#fff",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  adminButton: {
+    marginBottom: 20,
+  },
 });
-
