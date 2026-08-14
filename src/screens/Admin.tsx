@@ -28,6 +28,7 @@ export default function Admin({ navigation }: any) {
 
   async function carregarConsultas() {
     try {
+      // Admin vê todas as consultas
       const todasConsultas = await consultasService.listarConsultas(
         usuario?.id,
         true // isAdmin
@@ -41,10 +42,43 @@ export default function Admin({ navigation }: any) {
   }
 
   async function handleLogout() {
+    console.log("� ADMIN: Iniciando logout...");
     try {
       await logout();
+      console.log("✅ ADMIN: Logout concluído com sucesso");
     } catch (error) {
+      console.error("❌ ADMIN: Erro no logout:", error);
       Alert.alert("Erro", "Não foi possível sair da conta. Tente novamente.");
+    }
+  }
+
+  function getStatusColor(status: string) {
+    switch (status) {
+      case "agendada":
+        return "#2196F3";
+      case "confirmada":
+        return "#4CAF50";
+      case "realizada":
+        return "#9C27B0";
+      case "cancelada":
+        return "#f44336";
+      default:
+        return "#666";
+    }
+  }
+
+  function getStatusEmoji(status: string) {
+    switch (status) {
+      case "agendada":
+        return "📅";
+      case "confirmada":
+        return "✅";
+      case "realizada":
+        return "🏥";
+      case "cancelada":
+        return "❌";
+      default:
+        return "❓";
     }
   }
 
@@ -56,7 +90,7 @@ export default function Admin({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
-
+      
       <ScrollView>
         <View style={styles.header}>
           <Text style={styles.icone}>👨‍💼</Text>
@@ -67,7 +101,7 @@ export default function Admin({ navigation }: any) {
         {/* Dashboard de Estatísticas */}
         <View style={styles.statsContainer}>
           <Text style={styles.sectionTitle}>📊 Estatísticas</Text>
-
+          
           <View style={styles.statsGrid}>
             <View style={[styles.statCard, { backgroundColor: "#2196F3" }]}>
               <Text style={styles.statNumber}>{consultasAgendadas}</Text>
@@ -199,6 +233,10 @@ const styles = StyleSheet.create({
     padding: 24,
     borderRadius: 16,
     marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     elevation: 3,
   },
   menuIcone: {

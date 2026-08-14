@@ -1,60 +1,58 @@
-import { StatusConsulta } from "../types/statusConsulta";
+/**
+ * Funções utilitárias para formatação de dados
+ */
 
-const STATUS_META: Record<StatusConsulta, { cor: string; texto: string }> = {
-    agendada: {
-        cor: "#2196F3",
-        texto: "Agendada",
-    },
-    confirmada: {
-        cor: "#4CAF50",
-        texto: "Confirmada",
-    },
-    cancelada: {
-        cor: "#F44336",
-        texto: "Cancelada",
-    },
-    realizada: {
-        cor: "#9C27B0",
-        texto: "Realizada",
-    },
-};
+import { StatusConsulta } from "../types";
 
-export function formatarData(data: string | Date): string {
-    if (data instanceof Date) {
-        return data.toLocaleDateString("pt-BR");
-    }
-
-    const [ano, mes, dia] = data.split("-").map(Number);
-    const dataNormalizada = new Date(ano, mes - 1, dia);
-
-    if (Number.isNaN(dataNormalizada.getTime())) {
-        return data;
-    }
-
-    return dataNormalizada.toLocaleDateString("pt-BR");
+export function formatarData(data: string): string {
+  // Recebe data no formato ISO ou DD/MM/YYYY
+  // Retorna no formato DD/MM/YYYY
+  if (data.includes("-")) {
+    const [ano, mes, dia] = data.split("-");
+    return `${dia}/${mes}/${ano}`;
+  }
+  return data;
 }
 
 export function formatarHorario(horario: string): string {
-    if (/^\d{2}:\d{2}$/.test(horario)) {
-        return horario;
-    }
+  // Garante formato HH:MM
+  return horario.substring(0, 5);
+}
 
-    const horarioNormalizado = new Date(`1970-01-01T${horario}`);
+export function formatarCPF(cpf: string): string {
+  // Remove caracteres não numéricos
+  const numeros = cpf.replace(/\D/g, "");
+  // Formata: 000.000.000-00
+  return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+}
 
-    if (Number.isNaN(horarioNormalizado.getTime())) {
-        return horario;
-    }
-
-    return horarioNormalizado.toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+export function formatarTelefone(telefone: string): string {
+  // Remove caracteres não numéricos
+  const numeros = telefone.replace(/\D/g, "");
+  // Formata: (00) 00000-0000
+  if (numeros.length === 11) {
+    return numeros.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  }
+  // Formata: (00) 0000-0000
+  return numeros.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
 }
 
 export function obterCorStatus(status: StatusConsulta): string {
-    return STATUS_META[status].cor;
+  const cores: Record<StatusConsulta, string> = {
+    agendada: "#FFA500",
+    confirmada: "#4CAF50",
+    cancelada: "#F44336",
+    realizada: "#2196F3",
+  };
+  return cores[status];
 }
 
 export function obterTextoStatus(status: StatusConsulta): string {
-    return STATUS_META[status].texto;
+  const textos: Record<StatusConsulta, string> = {
+    agendada: "Agendada",
+    confirmada: "Confirmada",
+    cancelada: "Cancelada",
+    realizada: "Realizada",
+  };
+  return textos[status];
 }

@@ -5,7 +5,7 @@
 
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Consulta } from "../interfaces/consulta";
+import { Consulta } from "../types";
 import { formatarData, formatarHorario, obterCorStatus, obterTextoStatus } from "../utils/formatters";
 
 type ConsultaCardProps = {
@@ -162,10 +162,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#4CAF50",
   },
   botaoCancelar: {
-    backgroundColor: "#f44336",
+    backgroundColor: "#F44336",
   },
   botaoDetalhes: {
-    backgroundColor: "transparent",
+    backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#79059C",
   },
