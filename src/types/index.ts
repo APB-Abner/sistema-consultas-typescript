@@ -3,6 +3,8 @@
  * Aplicando conceitos de Type Alias, Union Types e Literal Types
  */
 
+import type { ClassificacaoPA } from "./pressaoArterial";
+
 // ===== STATUS E ENUMS =====
 
 export type StatusConsulta = "agendada" | "confirmada" | "cancelada" | "realizada";
@@ -48,6 +50,11 @@ export type Consulta = {
   horario: string;
   status: StatusConsulta;
   observacoes?: string;
+  prioridade?: boolean;
+  emergencia?: boolean;
+  pressaoSistolica?: number;
+  pressaoDiastolica?: number;
+  classificacaoPA?: ClassificacaoPA;
 };
 
 // ===== TIPOS PARA FORMULÁRIOS =====
