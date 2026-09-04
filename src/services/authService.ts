@@ -5,6 +5,7 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Usuario } from "../types/usuario";
+import { medicosMock } from "./mockData";
 
 // Usuários iniciais do sistema
 const USUARIOS_INICIAIS: Usuario[] = [
@@ -44,7 +45,120 @@ const USUARIOS_INICIAIS: Usuario[] = [
     telefone: "(11) 93456-7890",
     perfil: "paciente",
   },
+  {
+    id: 10,
+    nome: "Dr. Roberto Silva",
+    email: "roberto.silva@medico.com",
+    senha: "123456",
+    cpf: "111.111.111-11",
+    telefone: "(11) 90000-0001",
+    perfil: "medico",
+    medicoId: 1,
+    especialidade: "Cardiologia",
+  },
+  {
+    id: 11,
+    nome: "Dra. Maria Santos",
+    email: "maria.santos@medico.com",
+    senha: "123456",
+    cpf: "222.222.222-22",
+    telefone: "(11) 90000-0002",
+    perfil: "medico",
+    medicoId: 2,
+    especialidade: "Dermatologia",
+  },
+  {
+    id: 12,
+    nome: "Dr. João Pereira",
+    email: "joao.pereira@medico.com",
+    senha: "123456",
+    cpf: "333.333.333-33",
+    telefone: "(11) 90000-0003",
+    perfil: "medico",
+    medicoId: 3,
+    especialidade: "Ortopedia",
+  },
+  {
+    id: 13,
+    nome: "Dra. Ana Costa",
+    email: "ana.costa@medico.com",
+    senha: "123456",
+    cpf: "444.444.444-44",
+    telefone: "(11) 90000-0004",
+    perfil: "medico",
+    medicoId: 4,
+    especialidade: "Clínica Geral",
+  },
+  {
+    id: 14,
+    nome: "Dr. Paulo Oliveira",
+    email: "paulo.oliveira@medico.com",
+    senha: "123456",
+    cpf: "555.555.555-55",
+    telefone: "(11) 90000-0005",
+    perfil: "medico",
+    medicoId: 5,
+    especialidade: "Psiquiatria",
+  },
+  {
+    id: 15,
+    nome: "Dra. Carla Lima",
+    email: "carla.lima@medico.com",
+    senha: "123456",
+    cpf: "666.666.666-66",
+    telefone: "(11) 90000-0006",
+    perfil: "medico",
+    medicoId: 6,
+    especialidade: "Pediatria",
+  },
 ];
+
+/**
+ * Sincroniza médicos de teste em instalações que já possuíam usuários salvos.
+ */
+async function garantirMedicosDeTeste(usuarios: Usuario[]): Promise<Usuario[]> {
+  const medicosIniciais = USUARIOS_INICIAIS.filter(
+    (usuario) => usuario.perfil === "medico"
+  );
+  const atualizados = [...usuarios];
+  let alterou = false;
+
+  for (const medico of medicosIniciais) {
+    if (!atualizados.some((usuario) => usuario.email === medico.email)) {
+      atualizados.push(medico);
+      alterou = true;
+    }
+  }
+
+  for (let index = 0; index < atualizados.length; index += 1) {
+    const usuario = atualizados[index];
+    if (usuario.perfil !== "medico") continue;
+
+    const referencia = medicosIniciais.find(
+      (medico) => medico.email === usuario.email
+    );
+    if (
+      referencia &&
+      (usuario.medicoId !== referencia.medicoId ||
+        usuario.especialidade !== referencia.especialidade ||
+        usuario.nome !== referencia.nome)
+    ) {
+      atualizados[index] = {
+        ...usuario,
+        nome: referencia.nome,
+        medicoId: referencia.medicoId,
+        especialidade: referencia.especialidade,
+      };
+      alterou = true;
+    }
+  }
+
+  if (alterou) {
+    await AsyncStorage.setItem("@usuarios", JSON.stringify(atualizados));
+  }
+
+  return atualizados;
+}
 
 /**
  * Inicializa usuários no AsyncStorage se não existirem
@@ -55,8 +169,12 @@ export async function inicializarUsuarios(): Promise<void> {
     
     if (!usuariosExistentes) {
       await AsyncStorage.setItem("@usuarios", JSON.stringify(USUARIOS_INICIAIS));
-      console.log("✅ Usuários iniciais criados");
+      console.log("✅ Usuários iniciais criados (admin, pacientes e médicos)");
+      return;
     }
+
+    const usuarios: Usuario[] = JSON.parse(usuariosExistentes);
+    await garantirMedicosDeTeste(usuarios);
   } catch (error) {
     console.error("❌ Erro ao inicializar usuários:", error);
   }
@@ -106,7 +224,7 @@ export async function cadastrarUsuario(
     // Cria novo usuário
     const novoUsuario: Usuario = {
       ...dadosUsuario,
-      id: usuarios.length + 1,
+      id: Date.now(),
       perfil: "paciente", // Novos usuários sempre são pacientes
     };
 
@@ -134,6 +252,18 @@ export function obterCredenciaisTeste() {
       { nome: "Maria Santos", email: "maria@email.com", senha: "123456" },
       { nome: "Pedro Oliveira", email: "pedro@email.com", senha: "123456" },
     ],
+    medicos: medicosMock.map((medico) => {
+      const usuario = USUARIOS_INICIAIS.find(
+        (item) => item.perfil === "medico" && item.medicoId === medico.id
+      );
+
+      return {
+        nome: medico.nome,
+        especialidade: medico.especialidade,
+        email: usuario?.email ?? "",
+        senha: "123456",
+      };
+    }),
   };
 }
 

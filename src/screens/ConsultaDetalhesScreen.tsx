@@ -3,7 +3,7 @@
  * Exibe informações completas de uma consulta específica
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
 import { Consulta } from "../types";
 import { Loading } from "../components";
 import consultasService from "../services/consultasService";
+import { useAuth } from "../contexts/AuthContext";
 import {
   formatarData,
   formatarHorario,
@@ -32,17 +33,22 @@ export default function ConsultaDetalhesScreen({
   route,
 }: ConsultaDetalhesScreenProps) {
   const { consultaId } = route.params;
+  const { usuario, isAdmin, isMedico } = useAuth();
   const [consulta, setConsulta] = useState<Consulta | null>(null);
   const [loading, setLoading] = useState(true);
+  const usuarioEhAdmin = isAdmin();
+  const usuarioEhMedico = isMedico();
 
-  useEffect(() => {
-    carregarConsulta();
-  }, [consultaId]);
-
-  async function carregarConsulta() {
+  const carregarConsulta = useCallback(async () => {
     setLoading(true);
     try {
-      const dados = await consultasService.obterConsulta(consultaId);
+      const dados = await consultasService.obterConsulta(
+        consultaId,
+        usuario?.id,
+        usuarioEhAdmin,
+        usuarioEhMedico,
+        usuario?.medicoId
+      );
       setConsulta(dados);
     } catch (error) {
       console.error("Erro ao carregar consulta:", error);
@@ -51,7 +57,18 @@ export default function ConsultaDetalhesScreen({
     } finally {
       setLoading(false);
     }
-  }
+  }, [
+    consultaId,
+    navigation,
+    usuario?.id,
+    usuario?.medicoId,
+    usuarioEhAdmin,
+    usuarioEhMedico,
+  ]);
+
+  useEffect(() => {
+    void carregarConsulta();
+  }, [carregarConsulta]);
 
   async function handleConfirmar() {
     if (!consulta) return;
@@ -65,7 +82,13 @@ export default function ConsultaDetalhesScreen({
           text: "Confirmar",
           onPress: async () => {
             try {
-              await consultasService.confirmarConsulta(consulta.id);
+              await consultasService.confirmarConsulta(
+                consulta.id,
+                usuario?.id,
+                usuarioEhAdmin,
+                usuarioEhMedico,
+                usuario?.medicoId
+              );
               carregarConsulta();
             } catch (error) {
               Alert.alert("Erro", "Não foi possível confirmar a consulta");
@@ -89,7 +112,13 @@ export default function ConsultaDetalhesScreen({
           style: "destructive",
           onPress: async () => {
             try {
-              await consultasService.cancelarConsulta(consulta.id);
+              await consultasService.cancelarConsulta(
+                consulta.id,
+                usuario?.id,
+                usuarioEhAdmin,
+                usuarioEhMedico,
+                usuario?.medicoId
+              );
               carregarConsulta();
             } catch (error) {
               Alert.alert("Erro", "Não foi possível cancelar a consulta");

@@ -1,4 +1,4 @@
-import { Especialidade } from "../types/especialidade";
+import type { Especialidade } from "../types";
 
 export interface Medico {
   id: number;

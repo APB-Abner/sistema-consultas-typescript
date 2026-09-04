@@ -191,6 +191,23 @@ export default function Login({ navigation }: LoginProps) {
                   <Text style={styles.credencialTexto}>{paciente.senha}</Text>
                 </TouchableOpacity>
               ))}
+
+              {credenciais.medicos.map((medico, index) => (
+                <TouchableOpacity
+                  key={medico.email || `medico-${index}`}
+                  style={styles.credencialItem}
+                  onPress={() =>
+                    preencherCredenciais(medico.email, medico.senha)
+                  }
+                >
+                  <Text style={styles.credencialTipo}>👨‍⚕️ {medico.nome}</Text>
+                  <Text style={styles.credencialTexto}>
+                    {medico.especialidade}
+                  </Text>
+                  <Text style={styles.credencialTexto}>{medico.email}</Text>
+                  <Text style={styles.credencialTexto}>{medico.senha}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           )}
 

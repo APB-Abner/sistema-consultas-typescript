@@ -1,6 +1,6 @@
 /**
  * ConsultasListScreen - Lista de Consultas
- * Exibe consultas filtradas por usuário (paciente vê só suas, admin vê todas)
+ * Exibe consultas filtradas por perfil: admin, paciente ou médico.
  */
 
 import React, { useState, useCallback } from "react";
@@ -27,25 +27,23 @@ type ConsultasListScreenProps = {
 export default function ConsultasListScreen({
   navigation,
 }: ConsultasListScreenProps) {
-  const { usuario, isAdmin } = useAuth();
+  const { usuario, isAdmin, isMedico } = useAuth();
   const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filtroAtivo, setFiltroAtivo] = useState<StatusConsulta | "todas">("todas");
+  const usuarioEhAdmin = isAdmin();
+  const usuarioEhMedico = isMedico();
 
-  useFocusEffect(
-    useCallback(() => {
-      carregarConsultas();
-    }, [usuario?.id])
-  );
-
-  async function carregarConsultas() {
+  const carregarConsultas = useCallback(async () => {
     setLoading(true);
     try {
       // Carrega consultas filtradas por usuário
       const dados = await consultasService.listarConsultas(
         usuario?.id,
-        isAdmin()
+        usuarioEhAdmin,
+        usuarioEhMedico,
+        usuario?.medicoId
       );
       setConsultas(dados);
     } catch (error) {
@@ -54,7 +52,13 @@ export default function ConsultasListScreen({
     } finally {
       setLoading(false);
     }
-  }
+  }, [usuario?.id, usuario?.medicoId, usuarioEhAdmin, usuarioEhMedico]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void carregarConsultas();
+    }, [carregarConsultas])
+  );
 
   async function onRefresh() {
     setRefreshing(true);
@@ -64,7 +68,13 @@ export default function ConsultasListScreen({
 
   async function handleConfirmar(id: number) {
     try {
-      await consultasService.confirmarConsulta(id, usuario?.id, isAdmin());
+      await consultasService.confirmarConsulta(
+        id,
+        usuario?.id,
+        usuarioEhAdmin,
+        usuarioEhMedico,
+        usuario?.medicoId
+      );
       Alert.alert("Sucesso", "Consulta confirmada!");
       carregarConsultas();
     } catch (error: any) {
@@ -83,7 +93,13 @@ export default function ConsultasListScreen({
           style: "destructive",
           onPress: async () => {
             try {
-              await consultasService.cancelarConsulta(id, usuario?.id, isAdmin());
+              await consultasService.cancelarConsulta(
+                id,
+                usuario?.id,
+                usuarioEhAdmin,
+                usuarioEhMedico,
+                usuario?.medicoId
+              );
               Alert.alert("Sucesso", "Consulta cancelada");
               carregarConsultas();
             } catch (error: any) {
@@ -112,6 +128,22 @@ export default function ConsultasListScreen({
     return pb - pa;
   });
 
+  function obterTituloHeader(): string {
+    if (usuarioEhAdmin) return "📋 Todas as Consultas";
+    if (usuarioEhMedico) return "📋 Minha Agenda";
+    return "📋 Minhas Consultas";
+  }
+
+  function obterMensagemVazia(): string {
+    if (filtroAtivo !== "todas") {
+      return `Nenhuma consulta ${filtroAtivo}`;
+    }
+    if (usuarioEhMedico) {
+      return `Nenhuma consulta para o médico ${usuario?.nome ?? ""}`;
+    }
+    return "Nenhuma consulta encontrada";
+  }
+
   if (loading) {
     return <Loading mensagem="Carregando consultas..." />;
   }
@@ -121,10 +153,12 @@ export default function ConsultasListScreen({
       {/* Header com Info do Usuário */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
-          {isAdmin() ? "📋 Todas as Consultas" : "📋 Minhas Consultas"}
+          {obterTituloHeader()}
         </Text>
         <Text style={styles.headerSubtitle}>
-          {consultasFiltradas.length} consulta(s) encontrada(s)
+          {usuarioEhMedico && usuario?.especialidade
+            ? `${usuario.especialidade} · ${consultasFiltradas.length} consulta(s)`
+            : `${consultasFiltradas.length} consulta(s) encontrada(s)`}
         </Text>
       </View>
 
@@ -186,11 +220,7 @@ export default function ConsultasListScreen({
       {consultasFiltradas.length === 0 ? (
         <EmptyState
           icone="📅"
-          mensagem={
-            filtroAtivo === "todas"
-              ? "Nenhuma consulta encontrada"
-              : `Nenhuma consulta ${filtroAtivo}`
-          }
+          mensagem={obterMensagemVazia()}
         />
       ) : (
         <FlatList

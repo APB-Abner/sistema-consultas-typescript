@@ -1,7 +1,7 @@
 /**
  * Navigation - Configuração de Rotas com Autenticação
  * Define a navegação do aplicativo usando React Navigation
- * Controla acesso baseado no perfil do usuário (admin/paciente)
+ * Controla acesso baseado no perfil do usuário (admin/medico/paciente)
  */
 
 import React, { useEffect } from "react";
@@ -11,6 +11,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../contexts/AuthContext";
 import {
  HomeScreen,
+ MedicoHomeScreen,
  ConsultasListScreen,
  ConsultaDetalhesScreen,
  NovaConsultaScreen,
@@ -26,6 +27,7 @@ import {
 export type RootStackParamList = {
  Login: undefined;
  Home: undefined;
+ MedicoHome: undefined;
  ConsultasList: undefined;
  ConsultaDetalhes: { consultaId: number };
  NovaConsulta: undefined;
@@ -38,8 +40,14 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+function emojiPerfil(perfil?: string): string {
+ if (perfil === "admin") return "👨‍💼";
+ if (perfil === "medico") return "👨‍⚕️";
+ return "👤";
+}
+
 export default function Navigation() {
- const { usuario, loading, logout } = useAuth();
+ const { usuario, loading } = useAuth();
 
  // Log mudanças no estado de autenticação
  useEffect(() => {
@@ -79,7 +87,7 @@ export default function Navigation() {
  <View style={styles.userBadge}>
  <View style={styles.userInfo}>
  <Text style={styles.userName}>
- {usuario.perfil === "admin" ? "👨‍💼" : "👤"} {usuario.nome}
+ {emojiPerfil(usuario.perfil)} {usuario.nome}
  </Text>
  </View>
  </View>
@@ -137,6 +145,30 @@ export default function Navigation() {
  component={NovaConsultaScreen}
  options={{
  title: "Nova Consulta",
+ }}
+ />
+ </>
+ ) : usuario.perfil === "medico" ? (
+ <>
+ <Stack.Screen
+ name="MedicoHome"
+ component={MedicoHomeScreen}
+ options={{
+ title: "Área do Médico",
+ }}
+ />
+ <Stack.Screen
+ name="ConsultasList"
+ component={ConsultasListScreen}
+ options={{
+ title: "Minha Agenda",
+ }}
+ />
+ <Stack.Screen
+ name="ConsultaDetalhes"
+ component={ConsultaDetalhesScreen}
+ options={{
+ title: "Detalhes da Consulta",
  }}
  />
  </>
@@ -222,4 +254,3 @@ const styles = StyleSheet.create({
  fontWeight: "bold",
  },
 });
-

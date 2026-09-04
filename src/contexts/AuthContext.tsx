@@ -13,6 +13,7 @@ type AuthContextData = {
   login: (email: string, senha: string) => Promise<boolean>;
   logout: () => Promise<void>;
   isAdmin: () => boolean;
+  isMedico: () => boolean;
 };
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -144,8 +145,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return usuario?.perfil === "admin";
   }
 
+  function isMedico(): boolean {
+    return usuario?.perfil === "medico";
+  }
+
   return (
-    <AuthContext.Provider value={{ usuario, loading, login, logout, isAdmin }}>
+    <AuthContext.Provider
+      value={{ usuario, loading, login, logout, isAdmin, isMedico }}
+    >
       {children}
     </AuthContext.Provider>
   );
