@@ -5,7 +5,8 @@
  */
 
 import React, { useEffect } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
+import { styles } from "../styles/navigation.styles";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../contexts/AuthContext";
@@ -230,27 +231,3 @@ export default function Navigation() {
  </NavigationContainer>
  );
 }
-
-const styles = StyleSheet.create({
- loadingContainer: {
- flex: 1,
- justifyContent: "center",
- alignItems: "center",
- backgroundColor: "#fff",
- },
- headerRight: {
- marginRight: 10,
- },
- userBadge: {
- flexDirection: "row",
- alignItems: "center",
- },
- userInfo: {
- alignItems: "flex-end",
- },
- userName: {
- color: "#fff",
- fontSize: 12,
- fontWeight: "bold",
- },
-});
