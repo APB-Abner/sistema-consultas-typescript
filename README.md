@@ -119,6 +119,50 @@ Ou pressione `i` no terminal após executar `npm start`.
 2. Execute `npm start`
 3. Escaneie o QR Code com a câmera (iOS) ou com o app Expo Go (Android)
 
+## 📦 Build e distribuição com EAS
+
+O projeto possui perfis EAS separados para desenvolvimento, distribuição interna e produção. Antes do primeiro build, autentique-se com sua própria conta Expo e vincule o projeto:
+
+```bash
+npx eas-cli login
+npx eas-cli build:configure
+```
+
+O comando `build:configure` pode incluir automaticamente o `extra.eas.projectId` em `app.json`. Esse identificador não deve ser preenchido com um valor fictício.
+
+### Gerar APK Android para teste
+
+```bash
+npm run build:android:apk
+```
+
+O perfil `preview` gera um APK com distribuição interna. Ao concluir, o EAS apresenta o link e o QR Code reais para download. Abra esse link no aparelho Android, baixe o APK e autorize a instalação de aplicativos da fonte utilizada, se o sistema solicitar.
+
+### Gerar Android App Bundle para a Play Store
+
+```bash
+npm run build:android:aab
+```
+
+O perfil `production` gera um arquivo AAB, formato destinado à publicação na Google Play Store.
+
+### Gerar build de teste para iOS
+
+```bash
+npm run build:ios:preview
+```
+
+O build iOS depende dos requisitos de assinatura e da conta Apple configurada no EAS.
+
+### Estado da entrega
+
+- ✅ Nome, identificadores Android/iOS, versão e identidade visual configurados em `app.json`
+- ✅ Perfis `development`, `preview` e `production` definidos em `eas.json`
+- ✅ Comandos de build disponíveis em `package.json`
+- ⏳ Link e QR Code do APK: disponíveis somente após um build autenticado concluído no EAS
+
+As credenciais locais para demonstração podem ser consultadas na opção **Credenciais de teste** da tela de login.
+
 ## 📦 Dependências Principais
 
 - **React Native**: Framework mobile
@@ -143,6 +187,20 @@ Ou pressione `i` no terminal após executar `npm start`.
 - ✅ Criação de componentes reutilizáveis
 - ✅ Service layer com mock data
 - ✅ Preparação para AsyncStorage e API
+
+### Aula 27/08/2026 - Perfis e agenda médica
+- ✅ Mock de médicos e login por perfil
+- ✅ Área do médico com agenda individual
+- ✅ Filtros de consultas por médico
+
+### Aula 10/09/2026 - Refatoração de arquitetura
+- ✅ Estilos separados da lógica e do JSX
+- ✅ Organização centralizada em `src/styles/`
+
+### Aula 24/09/2026 - Build e distribuição
+- ✅ Configuração do Expo Application Services (EAS)
+- ✅ Perfil `preview` para APK e `production` para AAB
+- ✅ Identificadores nativos para Android e iOS
 
 ## 🎨 Telas Implementadas
 

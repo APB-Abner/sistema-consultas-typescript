@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "sistema-consultas-mobile",
+    "name": "Sistema de Consultas",
     "slug": "sistema-consultas-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,14 +9,17 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#79059C"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fiap.sistemaconsultas"
     },
     "android": {
+      "package": "com.fiap.sistemaconsultas",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#79059C",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
